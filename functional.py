@@ -6,7 +6,7 @@ from toolbox import clear_line_break
 
 def get_functionals():
     return {
-        "英语学术润色": {
+        "英语学术润色EN": {
             # 前言
             "Prefix":   r"Below is a paragraph from an academic paper. Polish the writing to meet the academic style, " +
                         r"improve the spelling, grammar, clarity, concision and overall readability. When necessary, rewrite the whole sentence. " +
@@ -15,12 +15,12 @@ def get_functionals():
             "Suffix":   r"",
             "Color":    r"secondary",    # 按钮颜色
         },
-        "中文学术润色": {
+        "中文学术润色CN": {
             "Prefix":   r"作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，" + 
                         r"同时分解长句，减少重复，并提供改进建议。请只提供文本的更正版本，避免包括解释。请编辑以下文本" + "\n\n",
             "Suffix":   r"",
         },
-        "查找语法错误": {
+        "查找语法错误EN": {
             "Prefix":   r"Can you help me ensure that the grammar and the spelling is correct? " +
                         r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." +
                         r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, " +
@@ -38,11 +38,11 @@ def get_functionals():
             "Suffix":   r"",
             "PreProcess": clear_line_break,    # 预处理：清除换行符
         },
-        "中译英": {
+        "中译英EN": {
             "Prefix":   r"Please translate following sentence to English:" + "\n\n",
             "Suffix":   r"",
         },
-        "学术中英互译": {
+        "学术中英互译EN": {
             "Prefix":   r"I want you to act as a scientific English-Chinese translator, " +
                         r"I will provide you with some paragraphs in one language " +
                         r"and your task is to accurately and academically translate the paragraphs only into the other language. " +
@@ -54,17 +54,21 @@ def get_functionals():
             "Suffix": "",
             "Color": "secondary",
         },
-        "英译中": {
-            "Prefix":   r"请翻译成中文：" + "\n\n",
+        "英译中EN": {
+            "Prefix":   r"Please translate following sentence to Chinese:" + "\n\n",
             "Suffix":   r"",
         },
-        "找图片": {
+        "找图片CN": {
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，" +
                         r"然后请使用Markdown格式封装，并且不要有反斜线，不要用代码块。现在，请按以下描述给我发送图片：" + "\n\n",
             "Suffix":   r"",
         },
-        "解释代码": {
+        "解释代码CN": {
             "Prefix":   r"请解释以下代码：" + "\n```\n",
+            "Suffix":   "\n```\n",
+        },
+        "解释代码EN": {
+            "Prefix":   r"Please explain the following code" + "\n```\n",
             "Suffix":   "\n```\n",
         },
     }

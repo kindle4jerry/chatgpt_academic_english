@@ -4,14 +4,15 @@
 # 默认按钮颜色是 secondary
 from toolbox import clear_line_break
 
-def get_functionals():
+
+def get_core_functions():
     return {
         "英语学术润色EN": {
             # 前言
             "Prefix":   r"Below is a paragraph from an academic paper. Polish the writing to meet the academic style, " +
                         r"improve the spelling, grammar, clarity, concision and overall readability. When necessary, rewrite the whole sentence. " +
                         r"Furthermore, list all modification and explain the reasons to do so in markdown table." + "\n\n",
-            # 后语 
+            # 后语
             "Suffix":   r"",
             "Color":    r"secondary",    # 按钮颜色
         },

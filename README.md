@@ -32,6 +32,7 @@ If you like this project, please give it a Star. If you've come up with more use
 批量注释生成 | [函数插件] 一键批量生成函数注释
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
+[PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [函数插件] PDF论文提取题目&摘要+翻译全文（多线程）
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
@@ -45,8 +46,9 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <!-- - 新界面（左：master主分支, 右：dev开发前沿） -->
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/229222589-b30ff298-adb1-4e1e-8352-466085919bfb.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
+
 
 
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
@@ -258,11 +260,12 @@ python check_proxy.py
 
 - version 3 (Todo): 
 - - 支持gpt4和其他更多llm
-- version 2.3+ (Todo): 
+- version 2.4+ (Todo): 
 - - 总结大工程源代码时文本过长、token溢出的问题
 - - 实现项目打包部署
 - - 函数插件参数接口优化
 - - 自更新
+- version 2.4: (1)新增PDF全文翻译功能; (2)新增输入区切换位置的功能; (3)新增垂直布局选项; (4)多线程函数插件优化。
 - version 2.3: 增强多线程交互性
 - version 2.2: 函数插件支持热重载
 - version 2.1: 可折叠式布局

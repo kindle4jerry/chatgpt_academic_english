@@ -42,6 +42,7 @@ If you like this project, please give it a Star. If you've come up with more use
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [函数插件] PDF论文提取题目&摘要+翻译全文（多线程）
+[谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) (Version>=2.45) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你选择有趣的文章
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
@@ -78,8 +79,9 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 
 - 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
 <div align="center">
-<img src="img/demo.jpg" width="500" >
+<img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
 </div>
+
 
 
 - 懒得看项目代码？整个工程直接给chatgpt炫嘴里

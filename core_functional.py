@@ -56,7 +56,7 @@ def get_core_functions():
             "Color": "secondary",
         },
         "英译中EN": {
-            "Prefix":   r"Please translate following sentence to Chinese:" + "\n\n",
+            "Prefix":   r"Please translate the following sentences into authentic Chinese:" + "\n\n",
             "Suffix":   r"",
         },
         "解释代码CN": {

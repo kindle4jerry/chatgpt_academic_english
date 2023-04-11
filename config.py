@@ -31,7 +31,7 @@ CODE_HIGHLIGHT = True
 LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
 
 # 发送请求到OpenAI后，等待多久判定为超时
-TIMEOUT_SECONDS = 25
+TIMEOUT_SECONDS = 30
 
 # 网页的端口, -1代表随机端口
 # 对于服务端，设置固定的端口是合理的，然后再套nginx等反向代理

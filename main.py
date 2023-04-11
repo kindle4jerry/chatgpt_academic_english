@@ -4,8 +4,8 @@ from request_llm.bridge_chatgpt import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT = \
-    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT')
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -52,6 +52,7 @@ if LAYOUT == "TOP-DOWN":
 cancel_handles = []
 with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
+    cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
     with gr_L1():
         with gr_L2(scale=2):
             chatbot = gr.Chatbot()
@@ -117,16 +118,16 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
     # 整理反复出现的控件句柄组合
-    input_combo = [txt, txt2, top_p, temperature, chatbot, history, system_prompt]
-    output_combo = [chatbot, history, status]
+    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+    output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
     cancel_handles.append(txt.submit(**predict_args))
     cancel_handles.append(txt2.submit(**predict_args))
     cancel_handles.append(submitBtn.click(**predict_args))
     cancel_handles.append(submitBtn2.click(**predict_args))
-    resetBtn.click(lambda: ([], [], "已重置"), None, output_combo)
-    resetBtn2.click(lambda: ([], [], "已重置"), None, output_combo)
+    resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
+    resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
     # 基础功能区的回调函数注册
     for k in functional:
         click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)

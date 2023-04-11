@@ -8,20 +8,60 @@ import re
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
+############################### 插件输入输出接驳区 #######################################
+class ChatBotWithCookies(list):
+    def __init__(self, cookie):
+        self._cookies = cookie
+
+    def write_list(self, list):
+        for t in list:
+            self.append(t)
+
+    def get_list(self):
+        return [t for t in self]
+
+    def get_cookies(self):
+        return self._cookies
 
 def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(txt, txt2, *args, **kwargs):
+    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args):
         txt_passon = txt
-        if txt == "" and txt2 != "":
-            txt_passon = txt2
-        yield from f(txt_passon, *args, **kwargs)
+        if txt == "" and txt2 != "": txt_passon = txt2
+        # 引入一个有cookie的chatbot
+        cookies.update({
+            'top_p':top_p, 
+            'temperature':temperature,
+        })
+        llm_kwargs = {
+            'api_key': cookies['api_key'],
+            'llm_model': cookies['llm_model'],
+            'top_p':top_p, 
+            'temperature':temperature,
+        }
+        plugin_kwargs = {
+            # 目前还没有
+        }
+        chatbot_with_cookie = ChatBotWithCookies(cookies)
+        chatbot_with_cookie.write_list(chatbot)
+        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
+def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
+    """
+    刷新用户界面
+    """
+    assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
+    yield chatbot.get_cookies(), chatbot, history, msg
+############################### ################## #######################################
+##########################################################################################
 
 def get_reduce_token_percent(text):
+    """
+        * 此函数未来将被弃用
+    """
     try:
         # text = "maximum context length is 4097 tokens. However, your messages resulted in 4870 tokens"
         pattern = r"(\d+)\s+tokens\b"
@@ -35,9 +75,10 @@ def get_reduce_token_percent(text):
     except:
         return 0.5, '不详'
 
-
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=True):
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[], sys_prompt='', long_connection=True):
     """
+        * 此函数未来将被弃用（替代函数 request_gpt_model_in_new_thread_with_ui_alive 文件 chatgpt_academic/crazy_functions/crazy_utils）
+
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
         i_say: 当前输入
         i_say_show_user: 显示到对话界面上的当前输入，例如，输入整个文件时，你绝对不想把文件的内容都糊到对话界面上
@@ -45,10 +86,10 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         top_p, temperature: gpt参数
         history: gpt参数 对话历史
         sys_prompt: gpt参数 sys_prompt
-        long_connection: 是否采用更稳定的连接方式（推荐）
+        long_connection: 是否采用更稳定的连接方式（推荐）（已弃用）
     """
     import time
-    from request_llm.bridge_chatgpt import predict_no_ui, predict_no_ui_long_connection
+    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
     from toolbox import get_conf
     TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
@@ -59,13 +100,9 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     def mt(i_say, history):
         while True:
             try:
-                if long_connection:
-                    mutable[0] = predict_no_ui_long_connection(
-                        inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
-                else:
-                    mutable[0] = predict_no_ui(
-                        inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
-                break
+                mutable[0] = predict_no_ui_long_connection(
+                    inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt)
+
             except ConnectionAbortedError as token_exceeded_error:
                 # 尝试计算比例，尽可能多地保留文本
                 p_ratio, n_exceed = get_reduce_token_percent(
@@ -91,7 +128,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         cnt += 1
         chatbot[-1] = (i_say_show_user,
                        f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt % 4)))
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
@@ -155,7 +192,7 @@ def CatchException(f):
                 chatbot = [["插件调度异常", "异常原因"]]
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield chatbot, history, f'异常 {e}'
+            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 
@@ -302,11 +339,9 @@ def format_io(self, y):
         return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
-    gpt_reply = close_up_code_segment_during_stream(
-        gpt_reply)  # 当代码输出半截的时候，试着补上后个```
+    gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
-        None if i_ask is None else markdown.markdown(
-            i_ask, extensions=['fenced_code', 'tables']),
+        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
@@ -433,27 +468,30 @@ def on_report_generated(files, chatbot):
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
+def is_openai_api_key(key):
+    # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
+    API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    return API_MATCH
 
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
+    from colorful import print亮红, print亮绿
     try:
         r = getattr(importlib.import_module('config_private'), arg)
     except:
         r = getattr(importlib.import_module('config'), arg)
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
-        # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
-        API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", r)
-        if API_MATCH:
-            print(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
+        if is_openai_api_key(r):
+            print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            assert False, "正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+            print亮红( "[API_KEY] 正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）")
     if arg == 'proxies':
         if r is None:
-            print('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问。建议：检查USE_PROXY选项是否修改。')
+            print亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问。建议：检查USE_PROXY选项是否修改。')
         else:
-            print('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
+            print亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
             assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
     return r
 

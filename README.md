@@ -9,6 +9,11 @@
 和binary-husky的原项目用法一样，原来的README.md接在后面  
 ___
 
+> **Note**
+>
+> 紧急：很抱歉2.60版本的一部分代码重构出错，目前2.67及以上版本已经解决，请您及时更新。
+>
+
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests（dev分支）**
@@ -23,7 +28,7 @@ If you like this project, please give it a Star. If you've come up with more use
 > 
 > 3.如果您不太习惯部分中文命名的函数、注释或者界面，您可以随时点击相关函数插件，调用ChatGPT一键生成纯英文的项目源代码。
 >
-> 4.项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
+
 
 <div align="center">
     
@@ -35,9 +40,10 @@ If you like this project, please give it a Star. If you've come up with more use
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
 [配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr) | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能与[函数插件]，插件支持[热更新](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
-[自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键读懂本项目的源代码
+[自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] [一键读懂](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)本项目的源代码
 [程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
 读论文 | [函数插件] 一键解读latex论文全文并生成摘要
+Latex全文翻译、润色 | [函数插件] 一键翻译或润色latex论文
 批量注释生成 | [函数插件] 一键批量生成函数注释
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
@@ -49,6 +55,8 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
 huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
+[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)混合支持（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中） | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
+兼容[TGUI](https://github.com/oobabooga/text-generation-webui)接入更多样的语言模型 | 接入opt-1.3b, galactica-1.3b等模型（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
 …… | ……
 
 </div>
@@ -88,6 +96,14 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
+
+- 多种大语言模型混合调用（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/231222778-34776885-a7f0-4f2c-b5f4-7cc2ef3ecb58.png" width="700" >
+</div>
+
+
 
 ## 直接运行 (Windows, Linux or MacOS)
 
@@ -292,8 +308,7 @@ python check_proxy.py
 # 借鉴项目1：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
-# 借鉴项目2：借鉴了mdtex2html中公式处理的方法
-https://github.com/polarwinkel/mdtex2html
-
+# 借鉴项目2：
+https://github.com/THUDM/ChatGLM-6B
 
 ```

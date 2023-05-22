@@ -10,11 +10,11 @@ if USE_PROXY:
     # [地址] 懂的都懂，不懂就填localhost或者127.0.0.1肯定错不了（localhost意思是代理软件安装在本机上）
     # [端口] 在代理软件的设置里找。虽然不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
 
-    # 代理网络的地址，打开你的科学上网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
+    # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
     proxies = {
         #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",
-        "https": "socks5h://localhost:11284",
+        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
+        "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
     }
 else:
     proxies = None
@@ -33,6 +33,7 @@ CODE_HIGHLIGHT = True
 
 # 窗口布局
 LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
+DARK_MODE = True  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
 
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 30
@@ -43,9 +44,10 @@ WEB_PORT = 55555
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-# OpenAI模型选择是（gpt4现在只对申请成功的人开放，体验gpt-4可以试试api2d）
+# 模型选择是
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+# P.S. 其他可用的模型还包括 ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
@@ -53,13 +55,28 @@ LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
+# 加一个live2d装饰
+ADD_WAIFU = False
+
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
 
 # 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改!!）
-# 格式 {"https://api.openai.com/v1/chat/completions": "重定向的URL"}
+# （高危设置！通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
+# 格式 {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
+# 例如 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
 API_URL_REDIRECT = {}
 
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
 CUSTOM_PATH = "/"
+
+# 如果需要使用newbing，把newbing的长长的cookie放到这里
+NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
+NEWBING_COOKIES = """
+your bing cookies here
+"""
+
+# 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
+SLACK_CLAUDE_BOT_ID = ''   
+SLACK_CLAUDE_USER_TOKEN = ''

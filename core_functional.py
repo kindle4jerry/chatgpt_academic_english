@@ -67,6 +67,13 @@ def get_core_functions():
             "Prefix":   r"请解释以下代码：" + "\n```\n",
             "Suffix":   "\n```\n",
         },
+        "参考文献转Bib": {
+            "Prefix":   r"Here are some bibliography items, please transform them into bibtex style." +
+                        r"Note that, reference styles maybe more than one kind, you should transform each item correctly." +
+                        r"Items need to be transformed:",
+            "Suffix":   r"",
+            "Visible": False,
+        }
         "找图片CN": {
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，" +
                         r"然后请使用Markdown格式封装，并且不要有反斜线，不要用代码块。现在，请按以下描述给我发送图片：" + "\n\n",

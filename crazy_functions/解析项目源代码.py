@@ -1,5 +1,6 @@
 from toolbox import update_ui
 from toolbox import CatchException, report_execption, write_results_to_file
+from .crazy_utils import input_clipping
 
 def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import os, copy
@@ -61,13 +62,15 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         previous_iteration_files.extend([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
         previous_iteration_files_string = ', '.join(previous_iteration_files)
         current_iteration_focus = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
-        i_say = f'根据以上分析，对程序的整体功能和构架重新做出概括。然后用一张markdown表格整理每个文件的功能（包括{previous_iteration_files_string}）。'
+        i_say = f'用一张Markdown表格简要描述以下文件的功能：{previous_iteration_files_string}。根据以上分析，用一句话概括程序的整体功能。'
         inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
         this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection)
         this_iteration_history.append(last_iteration_result)
+        # 裁剪input
+        inputs, this_iteration_history_feed = input_clipping(inputs=i_say, history=this_iteration_history, max_token_limit=2560)
         result = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=i_say, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot,
-            history=this_iteration_history,   # 迭代之前的分析
+            inputs=inputs, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot,
+            history=this_iteration_history_feed,   # 迭代之前的分析
             sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。")
         report_part_2.extend([i_say, result])
         last_iteration_result = result
@@ -180,7 +183,7 @@ def 解析一个Java项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
 
 
 @CatchException
-def 解析一个Rect项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 解析一个前端项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []  # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):
@@ -194,9 +197,15 @@ def 解析一个Rect项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
                     [f for f in glob.glob(f'{project_folder}/**/*.tsx', recursive=True)] + \
                     [f for f in glob.glob(f'{project_folder}/**/*.json', recursive=True)] + \
                     [f for f in glob.glob(f'{project_folder}/**/*.js', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.vue', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.less', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.sass', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.wxml', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.wxss', recursive=True)] + \
+                    [f for f in glob.glob(f'{project_folder}/**/*.css', recursive=True)] + \
                     [f for f in glob.glob(f'{project_folder}/**/*.jsx', recursive=True)]
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何Rect文件: {txt}")
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何前端相关文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)

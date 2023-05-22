@@ -11,13 +11,16 @@
 import tiktoken
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf
+from toolbox import get_conf, trimmed_format_exc
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
+
+from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
+from .bridge_newbing import predict as newbing_ui
 
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
@@ -48,6 +51,7 @@ class LazyloadTiktoken(object):
 API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
+newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -59,6 +63,7 @@ except:
 # 新版配置
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
+if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 
 
 # 获取tokenizer
@@ -116,8 +121,86 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    # newbing
+    "newbing": {
+        "fn_with_ui": newbing_ui,
+        "fn_without_ui": newbing_noui,
+        "endpoint": newbing_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
 }
+
+
+AVAIL_LLM_MODELS, = get_conf("AVAIL_LLM_MODELS")
+if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
+    from .bridge_jittorllms_rwkv import predict as rwkv_ui
+    model_info.update({
+        "jittorllms_rwkv": {
+            "fn_with_ui": rwkv_ui,
+            "fn_without_ui": rwkv_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "jittorllms_llama" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_llama import predict_no_ui_long_connection as llama_noui
+    from .bridge_jittorllms_llama import predict as llama_ui
+    model_info.update({
+        "jittorllms_llama": {
+            "fn_with_ui": llama_ui,
+            "fn_without_ui": llama_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_pangualpha import predict_no_ui_long_connection as pangualpha_noui
+    from .bridge_jittorllms_pangualpha import predict as pangualpha_ui
+    model_info.update({
+        "jittorllms_pangualpha": {
+            "fn_with_ui": pangualpha_ui,
+            "fn_without_ui": pangualpha_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "moss" in AVAIL_LLM_MODELS:
+    from .bridge_moss import predict_no_ui_long_connection as moss_noui
+    from .bridge_moss import predict as moss_ui
+    model_info.update({
+        "moss": {
+            "fn_with_ui": moss_ui,
+            "fn_without_ui": moss_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "stack-claude" in AVAIL_LLM_MODELS:
+    from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
+    from .bridge_stackclaude import predict as claude_ui
+    # claude
+    model_info.update({
+        "stack-claude": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": None,
+            "max_token": 8192,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        }
+    })
 
 
 def LLM_CATCH_EXCEPTION(f):
@@ -128,10 +211,7 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            from toolbox import get_conf
-            import traceback
-            proxies, = get_conf('proxies')
-            tb_str = '\n```\n' + traceback.format_exc() + '\n```\n'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated
@@ -182,7 +262,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
         def mutex_manager(window_mutex, observe_window):
             while True:
-                time.sleep(0.5)
+                time.sleep(0.25)
                 if not window_mutex[-1]: break
                 # 看门狗（watchdog）
                 for i in range(n_model): 
